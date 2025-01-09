@@ -29,7 +29,7 @@ def report(message):
 
 def hint(text):
     if text:
-        return f"\nHINT: you don't need to provide any info (i.e. an email) to this command."
+        return f"\nHINT: you don't need to provide any extra info (i.e. an email) to this command."
     return ""
 
 @app.route("/commands/register", methods=["POST"])
