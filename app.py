@@ -7,6 +7,7 @@ import pathlib
 import gsheets
 from pathlib import Path
 from config import bot_token, secret, form_url, sheet_id, sheet_range, channel
+from werkzeug.exceptions import HTTPException
 import re
 
 
@@ -38,9 +39,9 @@ def register():
     email = flask.request.values.get("text")
     user_data[user] = email
     json.dump(user_data, open(data_file, "w"))
-    report(f"<@{user}> registered email {email}")
+    report(f":information_source: <@{user}> registered email {email}")
     if not re.match(r"^[^@+]+(\+[^@]+)?@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$", email):
-        report(f"<@{user}> attempted to register invalid email '{email}'")
+        report(f":warning: <@{user}> attempted to register invalid email '{email}'")
         return f":x: '{email}' does not appear to be a valid email, please try again."
     return f":white_check_mark: Registered your email as {email}. You may now sign in/out with /signin, or check your status with /signin-status"
 
@@ -50,7 +51,7 @@ def signin():
     user = flask.request.values.get("user_id")
     email = user_data.get(user)
     if not email:
-        report(f"<@{user}> tried to sign in without registering")
+        report(f":information_source: <@{user}> tried to sign in without registering")
         return f":x: Please register your email with /signin-register [email]"
     try:
         data = get_signin_status(email)
@@ -62,7 +63,7 @@ def signin():
             return report(f":x: Unknown error submitting form with email '{email}', http status: {response.status_code}")
     except Exception as e:
         report(f":x: Unknown error signing in/out with email '{email}', {e}")
-        return f"Something went wrong singing in/out with email {email}, please use the form for now."
+        return f":x: Something went wrong singing in/out with email {email}, please use the form for now."
 
 
 
@@ -72,7 +73,7 @@ def status():
     email = user_data.get(user)
     if not email:
         report(f"<@{user}> tried to check status without registering")
-        return f"Please register your email with /sregister [email]"
+        return f":x: Please register your email with /sregister [email]"
     try:
         data = get_signin_status(email)
         if get_signin_status(email):
@@ -81,7 +82,13 @@ def status():
             return f":information_source: {email} is currently signed out" + hint(flask.request.values.get("text"))
     except Exception as e:
         report(f":x: Unknown error checking status with email '{email}', {e}")
-        return f"Something went wrong checking status with email {email}, please use the form for now."
+        return f":x: Something went wrong checking status with email {email}, please use the form for now."
+
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    report(f":x: {e} occured with request {flask.request.values}")
+    return ":x: Something went wrong, please try again later."
 
 
 def get_signin_status(email):
