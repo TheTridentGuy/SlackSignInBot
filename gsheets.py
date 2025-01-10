@@ -17,7 +17,7 @@ def get_range(sheet_id, r, token_path=Path(__file__).parent.resolve()/Path("toke
     if pathlib.Path(token_path).exists():
         creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token and False:
+        if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(str(credential_path), SCOPES)
