@@ -11,7 +11,7 @@ SAMPLE_SPREADSHEET_ID = "1Gph7zNLJ3voEk0RVGufDPXczWF5gY_8KcKnh1UHdHWY"
 SAMPLE_RANGE_NAME = "Signed In!A:E"
 
 
-def get_range(sheet_id, r, token_path=Path(__file__).parent.resolve()/Path("tokenx.json"),
+def get_range(sheet_id, r, token_path=Path(__file__).parent.resolve()/Path("token.json"),
               credential_path=Path(__file__).parent.resolve()/Path("credentials.json")):
     creds = None
     if pathlib.Path(token_path).exists():
