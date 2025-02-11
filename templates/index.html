@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join #sign-in-bot on Slack</title>
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+        h1, p {
+            text-align: center;
+            font-size: xx-large;
+        }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+        .flex-grow {
+            flex-grow: 1;
+        }
+        iframe {
+            border: none;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex-col">
+        <h1>Join #sign-in-bot on Slack</h1>
+        <p>
+            Having issues? Bot broken/down? Too lazy to run a single slash command? You can also use the form below:
+        </p>
+    </div>
+    <div class="flex-col flex-grow">
+        <iframe src="{{ form_url }}/viewform?embedded=true">Loading…</iframe>
+    </div>
+</body>
+</html>

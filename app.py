@@ -1,6 +1,9 @@
 import requests
+import datetime
 import slack_sdk
+import traceback
 import flask
+from flask import render_template
 from slackeventsapi import SlackEventAdapter
 import json
 import pathlib
@@ -33,6 +36,12 @@ def hint(text):
         return f"\nHINT: you don't need to provide any extra info (i.e. an email) to this command."
     return ""
 
+
+@app.route("/")
+def index():
+    return render_template("index.html", form_url=form_url)
+
+
 @app.route("/commands/register", methods=["POST"])
 def register():
     user = flask.request.values.get("user_id")
@@ -63,7 +72,7 @@ def signin():
             return report(f":x: Unknown error submitting form with email '{email}', http status: {response.status_code}")
     except Exception as e:
         report(f":x: Unknown error signing in/out with email '{email}', {e}")
-        return f":x: Something went wrong singing in/out with email {email}, please use the form for now."
+        return f":x: Something went wrong singing in/out with email {email}, please use the form ({form_url}/viewform) for now."
 
 
 
@@ -82,12 +91,21 @@ def status():
             return f":information_source: {email} is currently signed out" + hint(flask.request.values.get("text"))
     except Exception as e:
         report(f":x: Unknown error checking status with email '{email}', {e}")
-        return f":x: Something went wrong checking status with email {email}, please use the form for now."
+        return f":x: Something went wrong checking status with email {email}, please check the (https://docs.google.com/spreadsheets/d/{sheet_id}) sheet for now."
 
 
 @app.errorhandler(HTTPException)
 def handle_exception(e):
-    report(f":x: {e} occured with request {flask.request.values}")
+    headers = str(flask.request.headers).strip()
+    data = flask.request.data.decode("utf-8").strip()
+    method = flask.request.method
+    path = flask.request.path
+    http_version = flask.request.environ.get("SERVER_PROTOCOL", "HTTP/1.1")
+    report(f":x: [{datetime.datetime.now()}] {e.code} {e.description}"
+           + (f"\n\n-- TRACEBACK: --\n\n{traceback.format_exc().strip()}" if e.code == 500 else "")
+           + f"\n\n-- REQUEST: --\n\n{method} {http_version} {path}"
+           + (f"\n\n-- REQUEST HEADERS: --\n\n{headers}" if headers else "")
+           + (f"\n\n-- REQUEST DATA: --\n\n{data}" if data else ""))
     return ":x: Something went wrong, please try again later."
 
 
@@ -97,3 +115,7 @@ def get_signin_status(email):
         if entry[2] == email:
             return entry
     return False
+
+
+if __name__ == "__main__":
+    app.run("localhost", port=8080, debug=True)
